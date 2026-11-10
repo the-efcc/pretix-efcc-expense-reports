@@ -1,0 +1,46 @@
+{% extends "pretixcontrol/organizers/base.html" %}
+{% load i18n %}
+{% load bootstrap3 %}
+{% block title %}{% trans "Expense reports" %}{% endblock %}
+{% block inner %}
+    <h1>{% trans "Expense reports" %}</h1>
+    <p>
+        {% blocktrans trimmed %}
+            Expense reports submitted from the events of this organizer are created
+            as bills in one QuickBooks Online company. Create an app in the Intuit
+            developer portal, register the two addresses below in it, then enter
+            its keys here and connect.
+        {% endblocktrans %}
+    </p>
+    <dl class="dl-horizontal">
+        <dt>{% trans "Redirect URI" %}</dt>
+        <dd><code>{{ redirect_uri }}</code></dd>
+        <dt>{% trans "Webhook endpoint" %}</dt>
+        <dd>
+            <code>{{ webhook_url }}</code><br>
+            <small class="text-muted">{% trans "Subscribe it to the Bill and Bill Payment events, so that reports show up as paid." %}</small>
+        </dd>
+        <dt>{% trans "Connection" %}</dt>
+        <dd>
+            {% if realm_id %}
+                <span class="label label-success">{% blocktrans trimmed %}Connected to company {{ realm_id }}{% endblocktrans %}</span>
+            {% else %}
+                <span class="label label-warning">{% trans "Not connected" %}</span>
+            {% endif %}
+        </dd>
+    </dl>
+    <form action="" method="post" class="form-horizontal">
+        {% csrf_token %}
+        {% bootstrap_form form layout="horizontal" %}
+        <div class="form-group submit-group">
+            {% if has_client %}
+                <a href="{% url "plugins:pretix_efcc_expense_reports:oauth.connect" organizer=request.organizer.slug %}" class="btn btn-default">
+                    {% if realm_id %}{% trans "Reconnect to QuickBooks" %}{% else %}{% trans "Connect to QuickBooks" %}{% endif %}
+                </a>
+            {% endif %}
+            <button type="submit" class="btn btn-primary btn-save">
+                {% trans "Save" %}
+            </button>
+        </div>
+    </form>
+{% endblock %}

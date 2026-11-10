@@ -1,0 +1,3 @@
+[plugin]
+package = "pretix-efcc-expense-reports"
+modules = [ "pretix_efcc_expense_reports" ]

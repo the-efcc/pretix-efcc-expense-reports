@@ -1,0 +1,68 @@
+[build-system]
+requires = ["setuptools", "pretix-plugin-build"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pretix-efcc-expense-reports"
+version = "0.1.0"
+description = "Submit an event's expense reports to QuickBooks from the pretix backend"
+readme = "README.md"
+license = "AGPL-3.0-or-later"
+requires-python = ">=3.11,<3.15"
+dependencies = [
+    "requests>=2.32.0",
+]
+authors = [
+    {name = "EFCC"},
+]
+keywords = ["pretix", "quickbooks", "expenses"]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "pytest-django>=4.0",
+    "pretix>=2026.3.0",
+    "ruff>=0.1",
+]
+
+[project.urls]
+Homepage = "https://github.com/the-efcc/pretix-efcc-expense-reports"
+Repository = "https://github.com/the-efcc/pretix-efcc-expense-reports"
+
+[project.entry-points."pretix.plugin"]
+pretix_efcc_expense_reports = "pretix_efcc_expense_reports:PretixPluginMeta"
+
+[project.entry-points."distutils.commands"]
+build = "pretix_plugin_build.build:CustomBuild"
+
+[tool.setuptools]
+include-package-data = false
+
+[tool.setuptools.package-data]
+pretix_efcc_expense_reports = [
+    "templates/pretix_efcc_expense_reports/*",
+]
+
+[tool.setuptools.packages.find]
+include = ["pretix*"]
+namespaces = false
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "ARG", "B", "C4", "PIE", "RUF", "SIM", "UP"]
+ignore = ["RUF012"]  # Django's Meta classes and migrations are all mutable class attributes
+
+[tool.ruff.lint.per-file-ignores]
+# Django views and signal receivers take arguments they do not use
+"pretix_efcc_expense_reports/*.py" = ["ARG001", "ARG002"]
+"pretix_efcc_expense_reports/migrations/*.py" = ["E501"]
+"tests/*.py" = ["ARG001", "ARG005", "E402"]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "tests.settings"
+testpaths = ["tests"]
+pythonpath = ["."]

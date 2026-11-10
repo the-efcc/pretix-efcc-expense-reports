@@ -1,0 +1,85 @@
+{% extends "pretixcontrol/event/base.html" %}
+{% load i18n %}
+{% load money %}
+{% block title %}{% trans "Expense reports" %}{% endblock %}
+{% block content %}
+    <h1>{% trans "Expense reports" %}</h1>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="panel panel-default">
+                <div class="panel-heading">{% trans "Net revenue" %}</div>
+                <div class="panel-body">
+                    <strong>{{ revenue|money:request.event.currency }}</strong><br>
+                    <small class="text-muted">{% trans "Paid orders, taxes excluded" %}</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="panel panel-default">
+                <div class="panel-heading">{% trans "Expenses so far" %}</div>
+                <div class="panel-body">
+                    <strong>{{ expenses|money:request.event.currency }}</strong><br>
+                    <small class="text-muted">{% trans "Not counting reports deleted in QuickBooks" %}</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="panel panel-{% if balance < 0 %}danger{% else %}success{% endif %}">
+                <div class="panel-heading">{% trans "Net revenue minus expenses" %}</div>
+                <div class="panel-body">
+                    <strong>{{ balance|money:request.event.currency }}</strong><br>
+                    <small class="text-muted">{% trans "What the event has left" %}</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    <p>
+        <a href="{% url "plugins:pretix_efcc_expense_reports:add" organizer=request.event.organizer.slug event=request.event.slug %}" class="btn btn-primary">
+            <span class="fa fa-plus"></span> {% trans "Submit an expense report" %}
+        </a>
+    </p>
+    {% if reports %}
+        <div class="table-responsive">
+            <table class="table table-hover table-condensed">
+                <thead>
+                <tr>
+                    <th>{% trans "Date" %}</th>
+                    <th>{% trans "Pay to" %}</th>
+                    <th>{% trans "Category" %}</th>
+                    <th>{% trans "Description" %}</th>
+                    <th>{% trans "Submitted by" %}</th>
+                    <th>{% trans "Status" %}</th>
+                    <th class="text-right">{% trans "Amount" %}</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for report in reports %}
+                    <tr>
+                        <td>{{ report.date|date:"SHORT_DATE_FORMAT" }}</td>
+                        <td>{{ report.payee }}</td>
+                        <td>{{ report.category }}</td>
+                        <td>{{ report.description|linebreaksbr }}</td>
+                        <td>{{ report.submitted_by.get_full_name }}<br><small class="text-muted">{{ report.created|date:"SHORT_DATETIME_FORMAT" }}</small></td>
+                        <td>
+                            <span class="label label-{% if report.status == "paid" %}success{% elif report.status == "deleted" %}danger{% else %}warning{% endif %}">{{ report.get_status_display }}</span>
+                        </td>
+                        <td class="text-right">
+                            {% if report.status == "deleted" %}<del>{{ report.amount|money:request.event.currency }}</del>{% else %}{{ report.amount|money:request.event.currency }}{% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+                <tfoot>
+                <tr>
+                    <th colspan="6">{% trans "Total" %}</th>
+                    <th class="text-right">{{ expenses|money:request.event.currency }}</th>
+                </tr>
+                </tfoot>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty-collection">
+            <p>{% trans "No expense report has been submitted for this event yet." %}</p>
+        </div>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,2 @@
+recursive-include pretix_efcc_expense_reports/templates *
+include LICENSE
